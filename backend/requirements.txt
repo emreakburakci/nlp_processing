@@ -1,0 +1,7 @@
+fastapi
+pydantic
+uvicorn
+python-jose
+passlib
+spark-nlp==3.4.4
+pyspark==3.1.2

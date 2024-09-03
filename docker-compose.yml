@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIA2RP6IIHRC67YAUSK
+      - AWS_SECRET_ACCESS_KEY=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
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
