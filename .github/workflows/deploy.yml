@@ -73,9 +73,9 @@ jobs:
           --instance-ids "$EC2_INSTANCE_ID" \
           --document-name "AWS-RunShellScript" \
           --comment "Deploy Docker container" \
-          --parameters commands='
-            $(aws ecr get-login --no-include-email --region $AWS_REGION);
-            docker pull ${ECR_REPOSITORY}:${IMAGE_TAG};
-            docker-compose -f /path/to/your/docker-compose.yml down;
-            docker-compose -f /path/to/your/docker-compose.yml up -d;
-          '
+          --parameters commands='[
+            "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com",
+            "docker pull ${ECR_REPOSITORY}:${IMAGE_TAG}",
+            "docker-compose -f /path/to/your/docker-compose.yml down",
+            "docker-compose -f /path/to/your/docker-compose.yml up -d"
+          ]'
