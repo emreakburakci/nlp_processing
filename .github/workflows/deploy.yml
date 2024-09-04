@@ -57,25 +57,25 @@ jobs:
         # Push the Docker image to Amazon ECR
         docker push ${ECR_REPOSITORY}:${IMAGE_TAG}
 
-    - name: Deploy to EC2
+    - name: Deploy to EC2 using SSM
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
+        EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
       run: |
         # Install AWS CLI
         sudo apt-get update
         sudo apt-get install -y awscli
 
-        # Connect to EC2 instance and deploy
-        ssh -o StrictHostKeyChecking=no -i /path/to/your/key.pem ec2-user@your-ec2-instance-public-dns << 'EOF'
-          # Pull the latest image from ECR
-          $(aws ecr get-login --no-include-email --region $AWS_REGION)
-          docker pull ${ECR_REPOSITORY}:${IMAGE_TAG}
-
-          # Stop and remove existing containers
-          docker-compose -f /path/to/your/docker-compose.yml down
-
-          # Start new containers
-          docker-compose -f /path/to/your/docker-compose.yml up -d
-        EOF
+        # Run commands on EC2 instance using SSM
+        aws ssm send-command \
+          --instance-ids "$EC2_INSTANCE_ID" \
+          --document-name "AWS-RunShellScript" \
+          --comment "Deploy Docker container" \
+          --parameters commands='
+            $(aws ecr get-login --no-include-email --region $AWS_REGION);
+            docker pull ${ECR_REPOSITORY}:${IMAGE_TAG};
+            docker-compose -f /path/to/your/docker-compose.yml down;
+            docker-compose -f /path/to/your/docker-compose.yml up -d;
+          '
