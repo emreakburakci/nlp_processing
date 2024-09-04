@@ -9,3 +9,5 @@ passlib
 # pyspark
 numpy
 nltk
+bert-extractive-summarizer
+torch

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from nltk_service import extract_subject_candidates, perform_ner
-
+from bert_summarizer import summarize
 
 
 app = FastAPI()
@@ -101,7 +101,7 @@ class TextRequest(BaseModel):
 
 @app.post("/nlp/infer_subject")
 async def infer_subject_endpoint(request: TextRequest,token: str = Depends(get_current_user)):
-    data = extract_subject_candidates(request.text)
+    data = summarize(request.text)
     return {"data": data}
 
 
