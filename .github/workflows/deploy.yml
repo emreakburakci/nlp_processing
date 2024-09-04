@@ -1,0 +1,64 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and push Docker image to Amazon ECR
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        # Define the image name and tag
+        IMAGE_NAME=my-app
+        IMAGE_TAG=latest
+        AWS_REGION=${{ secrets.AWS_REGION }}
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        ECR_REPOSITORY=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}
+
+        # Build the Docker image
+        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+        # Tag the Docker image
+        docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ECR_REPOSITORY}:${IMAGE_TAG}
+
+        # Push the Docker image to Amazon ECR
+        docker push ${ECR_REPOSITORY}:${IMAGE_TAG}
+
+    - name: Deploy to EC2
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        # Install AWS CLI
+        sudo apt-get update
+        sudo apt-get install -y awscli
+
+        # Connect to EC2 instance and deploy
+        ssh -o StrictHostKeyChecking=no -i /path/to/your/key.pem ec2-user@your-ec2-instance-public-dns << 'EOF'
+          # Pull the latest image from ECR
+          $(aws ecr get-login --no-include-email --region ${{ secrets.AWS_REGION }})
+          docker pull ${ECR_REPOSITORY}:${IMAGE_TAG}
+
+          # Stop and remove existing containers
+          docker-compose -f /path/to/your/docker-compose.yml down
+
+          # Start new containers
+          docker-compose -f /path/to/your/docker-compose.yml up -d
+        EOF
