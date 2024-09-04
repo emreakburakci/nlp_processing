@@ -38,7 +38,7 @@ jobs:
 
         # Navigate to the directory containing the Dockerfile
         cd backend
-        
+
         # Build the Docker image
         docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
