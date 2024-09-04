@@ -36,6 +36,9 @@ jobs:
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         ECR_REPOSITORY=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_NAME}
 
+        # Navigate to the directory containing the Dockerfile
+        cd backend
+        
         # Build the Docker image
         docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
