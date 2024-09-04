@@ -3,5 +3,9 @@ pydantic
 uvicorn
 python-jose
 passlib
-spark-nlp==3.4.4
-pyspark==3.1.2
+# spark-nlp==5.4.2
+# pyspark==3.4.2
+# spark-nlp
+# pyspark
+numpy
+nltk

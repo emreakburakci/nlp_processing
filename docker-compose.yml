@@ -8,8 +8,10 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID=AKIA2RP6IIHRC67YAUSK
       - AWS_SECRET_ACCESS_KEY=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
+      - JAVA_OPTS="--add-opens java.base/java.nio=ALL-UNNAMED"
+
     volumes:
-      - ./backend:/app
+      - ./backend/app:/app
 
   frontend:
     build: ./frontend
